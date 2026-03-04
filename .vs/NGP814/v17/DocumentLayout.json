@@ -1,0 +1,108 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\lkjds\\source\\repos\\NGP814\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{43778959-E9BE-46CF-B676-0F7EC32CF28E}|NGP814\\NGP814.csproj|c:\\users\\lkjds\\source\\repos\\ngp814\\ngp814\\ngptcp.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{43778959-E9BE-46CF-B676-0F7EC32CF28E}|NGP814\\NGP814.csproj|solutionrelative:ngp814\\ngptcp.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{43778959-E9BE-46CF-B676-0F7EC32CF28E}|NGP814\\NGP814.csproj|c:\\users\\lkjds\\source\\repos\\ngp814\\ngp814\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "RelativeMoniker": "D:0:0:{43778959-E9BE-46CF-B676-0F7EC32CF28E}|NGP814\\NGP814.csproj|solutionrelative:ngp814\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{43778959-E9BE-46CF-B676-0F7EC32CF28E}|NGP814\\NGP814.csproj|c:\\users\\lkjds\\source\\repos\\ngp814\\ngp814\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{43778959-E9BE-46CF-B676-0F7EC32CF28E}|NGP814\\NGP814.csproj|solutionrelative:ngp814\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{43778959-E9BE-46CF-B676-0F7EC32CF28E}|NGP814\\NGP814.csproj|c:\\users\\lkjds\\source\\repos\\ngp814\\ngp814\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{43778959-E9BE-46CF-B676-0F7EC32CF28E}|NGP814\\NGP814.csproj|solutionrelative:ngp814\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{43778959-E9BE-46CF-B676-0F7EC32CF28E}|NGP814\\NGP814.csproj|c:\\users\\lkjds\\source\\repos\\ngp814\\ngp814\\form1.designer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{43778959-E9BE-46CF-B676-0F7EC32CF28E}|NGP814\\NGP814.csproj|solutionrelative:ngp814\\form1.designer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 5,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:128:0:{1fc202d4-d401-403c-9834-5b218574bb67}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\Users\\lkjds\\source\\repos\\NGP814\\NGP814\\Program.cs",
+              "RelativeDocumentMoniker": "NGP814\\Program.cs",
+              "ToolTip": "C:\\Users\\lkjds\\source\\repos\\NGP814\\NGP814\\Program.cs",
+              "RelativeToolTip": "NGP814\\Program.cs",
+              "ViewState": "AgIAAAEAAAAAAAAAAAAUwBMAAAAKAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-04T05:50:58.757Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "Form1.Designer.cs",
+              "DocumentMoniker": "C:\\Users\\lkjds\\source\\repos\\NGP814\\NGP814\\Form1.Designer.cs",
+              "RelativeDocumentMoniker": "NGP814\\Form1.Designer.cs",
+              "ToolTip": "C:\\Users\\lkjds\\source\\repos\\NGP814\\NGP814\\Form1.Designer.cs*",
+              "RelativeToolTip": "NGP814\\Form1.Designer.cs*",
+              "ViewState": "AgIAAIQBAAAAAAAAAAAYwJMBAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-04T04:42:45.022Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "Form1.cs",
+              "DocumentMoniker": "C:\\Users\\lkjds\\source\\repos\\NGP814\\NGP814\\Form1.cs",
+              "RelativeDocumentMoniker": "NGP814\\Form1.cs",
+              "ToolTip": "C:\\Users\\lkjds\\source\\repos\\NGP814\\NGP814\\Form1.cs*",
+              "RelativeToolTip": "NGP814\\Form1.cs*",
+              "ViewState": "AgIAACwAAAAAAAAAAAAUwDQAAAAoAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-04T03:36:48.593Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "Form1.cs [\uB514\uC790\uC778]",
+              "DocumentMoniker": "C:\\Users\\lkjds\\source\\repos\\NGP814\\NGP814\\Form1.cs",
+              "RelativeDocumentMoniker": "NGP814\\Form1.cs",
+              "ToolTip": "C:\\Users\\lkjds\\source\\repos\\NGP814\\NGP814\\Form1.cs [\uB514\uC790\uC778]*",
+              "RelativeToolTip": "NGP814\\Form1.cs [\uB514\uC790\uC778]*",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-04T01:20:49.554Z",
+              "EditorCaption": " [\uB514\uC790\uC778]"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "NGPTCP.cs",
+              "DocumentMoniker": "C:\\Users\\lkjds\\source\\repos\\NGP814\\NGP814\\NGPTCP.cs",
+              "RelativeDocumentMoniker": "NGP814\\NGPTCP.cs",
+              "ToolTip": "C:\\Users\\lkjds\\source\\repos\\NGP814\\NGP814\\NGPTCP.cs*",
+              "RelativeToolTip": "NGP814\\NGPTCP.cs*",
+              "ViewState": "AgIAABEAAAAAAAAAAAAzwCcAAAA7AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-04T00:20:34.051Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
