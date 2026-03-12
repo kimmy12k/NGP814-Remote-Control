@@ -13,6 +13,8 @@ namespace NGP814
     public class NGPTCP
     {
         private TcpClient _client;
+        //private Thread _thread;
+        private bool _isRunning = false;
         private NetworkStream _stream;
         private StreamReader _reader;
         private StreamWriter _writer;

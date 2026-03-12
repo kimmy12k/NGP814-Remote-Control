@@ -1,9 +1,11 @@
 ﻿using DevExpress.CodeParser;
 using DevExpress.DataProcessing;
+using DevExpress.DirectX.Common.Direct2D;
 using DevExpress.Drawing.Internal.Fonts.Interop;
 using DevExpress.Pdf.Native;
 using DevExpress.Utils.Animation;
 using DevExpress.XtraCharts.Designer.Native;
+using DevExpress.XtraReports.UI;
 using DevExpress.XtraRichEdit.Commands;
 using DevExpress.XtraRichEdit.Import.OpenXml;
 using DevExpress.XtraSpreadsheet.DocumentFormats.Xlsb;
@@ -25,6 +27,8 @@ namespace NGP814
     {
         private NGPTCP _ngp;// 여기서 생성 x
         private CancellationTokenSource _cts;
+        //private Thread _thread;
+        private bool _isRunning = false;
         private ChannelConfig[] _channels;
         private const double CH12_MAX_VOLT = 32.050;
         private const double CH34_MAX_VOLT = 64.050;
@@ -74,6 +78,7 @@ namespace NGP814
             try
             {
                 _cts?.Cancel();     // Task에 "멈춰!" 신호
+                //_isRunning = fasle
                 _ngp.Disconnect();
                 lblStatus.Text = "Disconnected";
                 lblStatus.Appearance.ForeColor = Color.Red;
@@ -144,7 +149,6 @@ namespace NGP814
                 double curr = double.Parse(txtSetCurr.Text);
                 lblAutoRangeWarning.Visible = false;
                 curr = CheckCurrentRanges(ch, curr);
-                //_channels[ch].Current = curr;
                 _channels[ch].CurrFlag = true;
                 CheckMode(ch);
                 _ngp.Write($"CURR {curr:F4}");
@@ -297,6 +301,7 @@ namespace NGP814
             catch (Exception ex)
             {
                 _cts.Cancel();
+                // _isRunning = false;
                 chkAutoRefresh.Checked = false;
                 MessageBox.Show("측정 실패: " + ex.Message);
             }
@@ -305,37 +310,75 @@ namespace NGP814
         {
             if (chkAutoRefresh.Checked)
             {
-                _cts = new CancellationTokenSource();
+                _cts = new CancellationTokenSource();  
                 Task.Run(() => MeasureLoop(_cts.Token));
+
             }
             else
             {
-                _cts?. Cancel();
+                _cts?. Cancel(); // _isRunning = false;
             }
+
+            //if (chkAutoRefresh.Checked)
+            //{
+            //    _isRunning = true;
+            // _thread = new Thread(MeasureLoop);
+            // _thread.IsBackground = true;
+            // _thread.Start();
+            //}
+            //else 
+            //{
+            //    _isRunning = false;
+            //}
         }
+
+
         //private void Timer_Tick(object sender, EventArgs e)
         //{
         //    DoMeasure();
         //}
-        private async Task MeasureLoop(CancellationToken Token)
+        private async Task MeasureLoop(CancellationToken Token) 
         {
-            while (!Token.IsCancellationRequested)//
+            while (!Token.IsCancellationRequested)
             {
                 try
                 {
                     this.Invoke(new Action(() =>
                      {
                         DoMeasure();
-                    }));
-                    
+                    })); 
                 }
                 catch
                 {
-                    chkAutoRefresh.Checked = false;
+                    chkAutoRefresh.Checked = false;// _isRunning = false;
                 }
                 await Task.Delay(500, Token);
             }
             
+            // Thread
+            //private void MeasureLoop()
+            //{
+            // while(_isRunning)
+            //{
+            //  try
+            //   {
+            //     this.Invoke(new Action(()=>
+            //          {
+            //              DoMeasure();
+            //            }));
+            //    }      
+            //   catch
+            //    {
+            //       _isRunning = false;
+            //       this.Invoke(new Action(() =>
+            //       {
+            //          chkAutoRefresh.Checked = false;
+            //        }));
+            //        break;
+            //       }
+            //     Thead.Sleep(500);
+            //     }
+            //  }
         }
         private void btnOutputOn_Click(object sender, EventArgs e)
         {
