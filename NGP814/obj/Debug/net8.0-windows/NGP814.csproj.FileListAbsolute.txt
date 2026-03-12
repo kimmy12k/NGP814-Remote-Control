@@ -153,3 +153,4 @@ C:\Users\lkjds\source\repos\NGP814\NGP814\obj\Debug\net8.0-windows\refint\NGP814
 C:\Users\lkjds\source\repos\NGP814\NGP814\obj\Debug\net8.0-windows\NGP814.pdb
 C:\Users\lkjds\source\repos\NGP814\NGP814\obj\Debug\net8.0-windows\NGP814.genruntimeconfig.cache
 C:\Users\lkjds\source\repos\NGP814\NGP814\obj\Debug\net8.0-windows\ref\NGP814.dll
+C:\Users\lkjds\source\repos\NGP814\NGP814\obj\Debug\net8.0-windows\NGP814.sourcelink.json
