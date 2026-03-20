@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "Jx3Jy7rSTWM=",
+  "dgSpecHash": "bGJMKz/X2bo=",
   "success": true,
-  "projectFilePath": "C:\\Users\\lkjds\\source\\repos\\NGP814\\NGP814\\NGP814.csproj",
+  "projectFilePath": "C:\\Users\\lkjds\\source\\repos\\NGP814-Remote-Control\\NGP814\\NGP814.csproj",
   "expectedPackageFiles": [
     "D:\\Program Files\\DevExpress\\Components\\Offline Packages\\devexpress.charts\\24.2.5\\devexpress.charts.24.2.5.nupkg.sha512",
     "D:\\Program Files\\DevExpress\\Components\\Offline Packages\\devexpress.charts.core\\24.2.5\\devexpress.charts.core.24.2.5.nupkg.sha512",

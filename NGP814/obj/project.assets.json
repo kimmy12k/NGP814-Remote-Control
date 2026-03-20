@@ -3744,11 +3744,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\lkjds\\source\\repos\\NGP814\\NGP814\\NGP814.csproj",
+      "projectUniqueName": "C:\\Users\\lkjds\\source\\repos\\NGP814-Remote-Control\\NGP814\\NGP814.csproj",
       "projectName": "NGP814",
-      "projectPath": "C:\\Users\\lkjds\\source\\repos\\NGP814\\NGP814\\NGP814.csproj",
+      "projectPath": "C:\\Users\\lkjds\\source\\repos\\NGP814-Remote-Control\\NGP814\\NGP814.csproj",
       "packagesPath": "C:\\Users\\lkjds\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\lkjds\\source\\repos\\NGP814\\NGP814\\obj\\",
+      "outputPath": "C:\\Users\\lkjds\\source\\repos\\NGP814-Remote-Control\\NGP814\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "D:\\Program Files\\DevExpress\\Components\\Offline Packages",

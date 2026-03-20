@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("NGP814")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+7ec6d8905adb50966008a7c2ea8a74b67849eba7")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+1fe1a1ba3c4f184c309a1a994ad248ddafff6f48")]
 [assembly: System.Reflection.AssemblyProductAttribute("NGP814")]
 [assembly: System.Reflection.AssemblyTitleAttribute("NGP814")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

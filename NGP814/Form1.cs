@@ -1,9 +1,11 @@
 ﻿using DevExpress.CodeParser;
 using DevExpress.DataProcessing;
+using DevExpress.DirectX.Common.Direct2D;
 using DevExpress.Drawing.Internal.Fonts.Interop;
 using DevExpress.Pdf.Native;
 using DevExpress.Utils.Animation;
 using DevExpress.XtraCharts.Designer.Native;
+using DevExpress.XtraReports.UI;
 using DevExpress.XtraRichEdit.Commands;
 using DevExpress.XtraRichEdit.Import.OpenXml;
 using DevExpress.XtraSpreadsheet.DocumentFormats.Xlsb;
@@ -23,8 +25,9 @@ namespace NGP814
 {
     public partial class Form1 : DevExpress.XtraEditors.XtraForm
     {
-        private NGPTCP _ngp;// 여기서 생성 x
-        private CancellationTokenSource _cts;
+        private NGPTCP _ngp;
+        private CancellationTokenSource _cts;    // Task용 취소 리모컨
+        private Task _measureTask;
         private ChannelConfig[] _channels;
         private const double CH12_MAX_VOLT = 32.050;
         private const double CH34_MAX_VOLT = 64.050;
@@ -40,7 +43,7 @@ namespace NGP814
         public Form1()
         {
             InitializeComponent();
-            _ngp = new NGPTCP();//
+            _ngp = new NGPTCP();
 
         }
 
@@ -92,7 +95,7 @@ namespace NGP814
             {
                 int ch = GetSelectedChannel();
                 double volt = double.Parse(txtSetVolt.Text);
-                volt = CheckVoltRanges(ch, volt);// autoRanging
+                volt = CheckVoltRanges(ch, volt);
                 _ngp.Write($"VOLT {volt:F3}");
                 _channels[ch].VoltFlag = true;
                 CheckMode(ch);
@@ -144,7 +147,6 @@ namespace NGP814
                 double curr = double.Parse(txtSetCurr.Text);
                 lblAutoRangeWarning.Visible = false;
                 curr = CheckCurrentRanges(ch, curr);
-                //_channels[ch].Current = curr;
                 _channels[ch].CurrFlag = true;
                 CheckMode(ch);
                 _ngp.Write($"CURR {curr:F4}");
@@ -189,7 +191,7 @@ namespace NGP814
                 MessageBox.Show("전류 읽기 실패: " + ex.Message);
             }
         }
-        private void btnApplyLimit_Click(object sender, EventArgs e)// safety limits:   restrict the output voltage and current range to prevent dangerous settings for the DUT    5.5.4  page 79
+        private void btnApplyLimit_Click(object sender, EventArgs e)
         {
             try
             {
@@ -207,7 +209,7 @@ namespace NGP814
 
                 _ngp.Write($"VOLT:ALIM:LOW {voltLow:F3}");
                 _ngp.Write($"VOLT:ALIM {voltHigh:F3}");
-                // 전류 Limit
+
                 double currLow = double.Parse(txtCurrLow.Text);
                 double currHigh = double.Parse(txtCurrHigh.Text);
 
@@ -221,7 +223,7 @@ namespace NGP814
 
 
                 int enable = chkAlimEnable.Checked ? 1 : 0;
-                _ngp.Write($"ALIM {enable}");// 안전모드 설정 명령어 -> 나중에(순서)
+                _ngp.Write($"ALIM {enable}");
                 if (enable == 1)
                     MessageBox.Show("Safety Limit 적용 완료");
             }
@@ -248,17 +250,15 @@ namespace NGP814
             try
             {
                 int ch = GetSelectedChannel();
-                // Safety Limit 상태
-                string alimState = _ngp.Query("ALIM?");// 1-> safety limits 0-> off
+                string alimState = _ngp.Query("ALIM?");
                 chkAlimEnable.Checked = alimState.Trim() == "1";
-                // 전압 Limit
                 string voltLow = _ngp.Query("VOLT:ALIM:LOW?");
                 string voltHigh = _ngp.Query("VOLT:ALIM?");
                 txtVoltLow.Text = double.Parse(voltLow).ToString("F3");
                 txtVoltHigh.Text = double.Parse(voltHigh).ToString("F3");
                 _channels[ch].VltLwFlag = true;
                 _channels[ch].VltHFlag = true;
-                // 전류 Limit
+
                 string currLow = _ngp.Query("CURR:ALIM:LOW?");
                 string currHigh = _ngp.Query("CURR:ALIM?");
                 _channels[ch].CrLwFlag = true;
@@ -272,31 +272,26 @@ namespace NGP814
                 MessageBox.Show("Limit 읽기 실패: " + ex.Message);
             }
         }
-
         private void btnMeasure_Click(object sender, EventArgs e)
         {
-            DoMeasure();
+            int ch = GetSelectedChannel();
+            _ngp.SelectChannel(ch);
+            string voltResult = _ngp.Query("MEAS:VOLT?");
+            double volt = double.Parse(voltResult);
+            string currResult = _ngp.Query("MEAS:CURR?");
+            double curr = double.Parse(currResult);
+            ShowMeasurements(volt,curr);
         }
-        private void DoMeasure()
+        private void ShowMeasurements(double volt,double curr)
         {
             try
             {
-                int ch = GetSelectedChannel();
-                _ngp.SelectChannel(ch);
-
-                // 전압 측정
-                string voltResult = _ngp.Query("MEAS:VOLT?");// MEAS: VOLT: MAX// MEAS: VOLT: MIN -> 전압 실제 값 측정
-                double volt = double.Parse(voltResult);
                 lblMeasVolt.Text = volt.ToString("F3") + " V";
-
-                // 전류 측정
-                string currResult = _ngp.Query("MEAS:CURR?");
-                double curr = double.Parse(currResult);
                 lblMeasCurr.Text = curr.ToString("F4") + " A";
             }
             catch (Exception ex)
             {
-                _cts.Cancel();
+                _cts?.Cancel();                  // Task 멈춤
                 chkAutoRefresh.Checked = false;
                 MessageBox.Show("측정 실패: " + ex.Message);
             }
@@ -305,37 +300,48 @@ namespace NGP814
         {
             if (chkAutoRefresh.Checked)
             {
-                _cts = new CancellationTokenSource();
-                Task.Run(() => MeasureLoop(_cts.Token));
+                if (_measureTask != null && !_measureTask.IsCompleted)
+                    return;
+                _cts = new CancellationTokenSource();        // 새 리모컨 생성
+                _measureTask= Task.Run(() => MeasureLoop(_cts.Token));      // 백그라운드에서 루프 시작
             }
             else
             {
-                _cts?. Cancel();
+                _cts?.Cancel();
+                _cts = null;// 리모컨으로 "멈춰!" 신호
             }
         }
-        //private void Timer_Tick(object sender, EventArgs e)
-        //{
-        //    DoMeasure();
-        //}
-        private async Task MeasureLoop(CancellationToken Token)
+        private async Task MeasureLoop(CancellationToken token)
         {
-            while (!Token.IsCancellationRequested)//
+            while (!token.IsCancellationRequested)            // 취소 신호 올 때까지 반복
             {
                 try
                 {
+                    int ch = 0;
                     this.Invoke(new Action(() =>
-                     {
-                        DoMeasure();
+                    {
+                        ch = GetSelectedChannel();
                     }));
-                    
+                    _ngp.SelectChannel(ch);
+                    string voltResult = _ngp.Query("MEAS:VOLT?");
+                    double volt = double.Parse(voltResult);
+                    string currResult = _ngp.Query("MEAS:CURR?");
+                    double curr = double.Parse(currResult);
+                    this.BeginInvoke(new Action(() =>               // UI 스레드에서 실행 요청
+                    {
+                        ShowMeasurements(volt,curr);
+                    }));
                 }
                 catch
                 {
-                    chkAutoRefresh.Checked = false;
+                    this.BeginInvoke(new Action(() =>               // UI 스레드에서 체크 해제
+                    {
+                        chkAutoRefresh.Checked = false;
+                    }));
+                    break;
                 }
-                await Task.Delay(500, Token);
+                await Task.Delay(500, token);                  // 0.5초 비동기 대기
             }
-            
         }
         private void btnOutputOn_Click(object sender, EventArgs e)
         {
@@ -343,20 +349,20 @@ namespace NGP814
             {
                 int ch = GetSelectedChannel();
                 _ngp.SelectChannel(ch);
-                _ngp.Write("OUTP 1"); // 1 Switches on previous selected channels.  -  page198 
+                _ngp.Write("OUTP 1");
             }
             catch (Exception ex)
             {
                 MessageBox.Show("Output ON 실패: " + ex.Message);
             }
         }
-        private void simpleButton2_Click(object sender, EventArgs e) // OUtPut Off
+        private void simpleButton2_Click(object sender, EventArgs e)
         {
             try
             {
                 int ch = GetSelectedChannel();
                 _ngp.SelectChannel(ch);
-                _ngp.Write("OUTP 0"); // 0 Switches off previous selected channels - page 198
+                _ngp.Write("OUTP 0");
             }
             catch (Exception ex)
             {
@@ -365,7 +371,7 @@ namespace NGP814
         }
         private int GetSelectedChannel()
         {
-            if (rgChannel.EditValue == null) return 1;// NGP814도  초기 값이 1번 채널
+            if (rgChannel.EditValue == null) return 1;
             return Convert.ToInt32(rgChannel.EditValue);
         }
 
@@ -375,11 +381,10 @@ namespace NGP814
             switch (ch)
             {
                 case 1:
-                case 2://Maximum output voltage: 32V  Minimum voltage at 0.000 V   매뉴얼 3-2 page 28 
+                case 2:
                     if (volt > CH12_MAX_VOLT)
                     {
                         volt = CH12_MAX_VOLT;
-
                         ValidateRange(ch, volt, MIN_VOLT, true, true);
                         return volt;
                     }
@@ -391,7 +396,7 @@ namespace NGP814
                     }
                     return volt;
                     break;
-                default: // Maximum output voltage:64 V Minimum Voltage at 0.001 V  page 28
+                default:
                     if (volt > CH34_MAX_VOLT)
                     {
                         volt = CH34_MAX_VOLT;
@@ -414,7 +419,7 @@ namespace NGP814
             switch (ch)
             {
                 case 1:
-                case 2://Maximum output voltage: 32V  Minimum voltage at 0.000 V   매뉴얼 3-2 page 28
+                case 2:
                     if (curr > CH12_MAX_CURR)
                     {
                         curr = CH12_MAX_CURR;
@@ -428,7 +433,7 @@ namespace NGP814
                     }
                     return curr;
                     break;
-                default: // Maximum output voltage:64 V Minimum Voltage at 0.001 V  page 28
+                default:
                     if (curr > CH34_MAX_CURR)
                     {
                         curr = CH34_MAX_CURR;
@@ -443,7 +448,7 @@ namespace NGP814
                     return curr;
             }
         }
-        private void UpdatePowerBar(int ch)//  (ch, v) 
+        private void UpdatePowerBar(int ch)
         {
             try
             {
@@ -456,7 +461,6 @@ namespace NGP814
                 {
                     lblPowerInfo.Text = $"200 W(최대 파워) - {power - MAX_POWER}W 만큼 초과!!!";
                     lblPowerInfo.Appearance.ForeColor = Color.Red;
-                    //ChangetxtColor(ch);
                 }
                 else if (power > 160 && power < MAX_POWER)
                 {
@@ -584,19 +588,15 @@ namespace NGP814
 
         private void CheckMode(int ch)
         {
-            //모드 설정
-            string modeResult = _ngp.Query($"STAT:QUES:INST:ISUM{ch}:COND?").Trim(); // 1= cc , 2 = cv
+            string modeResult = _ngp.Query($"STAT:QUES:INST:ISUM{ch}:COND?").Trim();
             lblMeasMode.Text = modeResult == "1" ? "CC" : modeResult == "2" ? "CV" : "OFF";
-            //return modeResult == "1"? true : false;
         }
 
 
         private void resetValue(int ch)
         {
-            // 회색 글씨
             ApplyGrayText(ch);
 
-            // Voltage/Current Control
             lblAutoRangeWarning.Visible = false;
             int keyN = 0;
             if (_channels[ch].VoltFlag && !_channels[ch].CurrFlag)
@@ -607,11 +607,9 @@ namespace NGP814
                 keyN = 3;
             LoadVoltCurr(ch, keyN);
 
-            //safety limit(Alim)    
             ShowSafetyValues(ch);
 
-            //Measure
-            string modeResult = _ngp.Query($"STAT:QUES:INST:ISUM{ch}:COND?").Trim(); // 1= cc , 2 = cv
+            string modeResult = _ngp.Query($"STAT:QUES:INST:ISUM{ch}:COND?").Trim();
             lblMeasMode.Text = modeResult == "1" ? "CC" : modeResult == "2" ? "CV" : "OFF";
         }
         private void LoadVoltCurr(int ch, int key)
@@ -649,23 +647,11 @@ namespace NGP814
             {
                 txtSetVolt.BackColor = Color.Yellow;
                 txtSetVolt.Text = double.Parse(_ngp.Query("VOLT?")).ToString("F3");
-                //_channels[ch].Voltage = double.Parse(_ngp.Query("VOLT?"));
                 return;
             }
 
             txtSetCurr.BackColor = Color.Yellow;
             txtSetCurr.Text = double.Parse(_ngp.Query("CURR?")).ToString("F4");
-            //_channels[ch].Current = double.Parse(_ngp.Query("CURR?"));
-
-            // CH1만 초기화하고 싶을 때
-            //_ngp.SelectChannel(1);
-            //_ngp.Write("VOLT 0.000");
-            //_ngp.Write("CURR 0.001");
-            //_ngp.Write("OUTP 0");
-            //_ngp.Write("ALIM 0");
-
-            // 장비 전체 리셋
-            // _ngp.Write(*RST);
         }
     }
 }
