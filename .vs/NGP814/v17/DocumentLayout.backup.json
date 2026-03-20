@@ -7,11 +7,11 @@
       "RelativeMoniker": "D:0:0:{43778959-E9BE-46CF-B676-0F7EC32CF28E}|NGP814\\NGP814.csproj|solutionrelative:ngp814\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\lkjds\\OneDrive\\Desktop\\BTS_FILE\\C#\\NGP814\\Form1_Task.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{43778959-E9BE-46CF-B676-0F7EC32CF28E}|NGP814\\NGP814.csproj|C:\\Users\\lkjds\\source\\repos\\NGP814-Remote-Control\\ngp814\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
       "RelativeMoniker": "D:0:0:{43778959-E9BE-46CF-B676-0F7EC32CF28E}|NGP814\\NGP814.csproj|solutionrelative:ngp814\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\lkjds\\OneDrive\\Desktop\\BTS_FILE\\C#\\NGP814\\Form1_Task.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -29,16 +29,15 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 2,
               "Title": "Form1_Task.cs",
               "DocumentMoniker": "C:\\Users\\lkjds\\OneDrive\\Desktop\\BTS_FILE\\C#\\NGP814\\Form1_Task.cs",
               "RelativeDocumentMoniker": "..\\..\\..\\OneDrive\\Desktop\\BTS_FILE\\C#\\NGP814\\Form1_Task.cs",
               "ToolTip": "C:\\Users\\lkjds\\OneDrive\\Desktop\\BTS_FILE\\C#\\NGP814\\Form1_Task.cs",
               "RelativeToolTip": "..\\..\\..\\OneDrive\\Desktop\\BTS_FILE\\C#\\NGP814\\Form1_Task.cs",
-              "ViewState": "AgIAAB4AAAAAAAAAAAAAAE0AAAAVAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAE0AAAAVAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-17T02:58:05.615Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-03-17T02:58:05.615Z"
             },
             {
               "$type": "Document",
@@ -48,14 +47,14 @@
               "RelativeDocumentMoniker": "NGP814\\Form1.cs",
               "ToolTip": "C:\\Users\\lkjds\\source\\repos\\NGP814-Remote-Control\\NGP814\\Form1.cs",
               "RelativeToolTip": "NGP814\\Form1.cs",
-              "ViewState": "AgIAAGwBAAAAAAAAAAAkwA8CAAAJAAAAAAAAAA==",
+              "ViewState": "AgIAACYBAAAAAAAAAAAkwDQBAAAQAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-03-17T01:42:04.114Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 1,
               "Title": "Form1.cs [\uB514\uC790\uC778]",
               "DocumentMoniker": "C:\\Users\\lkjds\\source\\repos\\NGP814-Remote-Control\\NGP814\\Form1.cs",
               "RelativeDocumentMoniker": "NGP814\\Form1.cs",
