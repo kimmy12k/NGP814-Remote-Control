@@ -27,7 +27,7 @@ namespace NGP814
     {
         private NGPTCP _ngp;
         private Thread _thread;              // Task → Thread
-        private bool _isRunning = false;
+        private CancellationTokenSource _cts;
         private ChannelConfig[] _channels;
         private const double CH12_MAX_VOLT = 32.050;
         private const double CH34_MAX_VOLT = 64.050;
@@ -44,7 +44,6 @@ namespace NGP814
         {
             InitializeComponent();
             _ngp = new NGPTCP();
-
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -76,7 +75,7 @@ namespace NGP814
         {
             try
             {
-                _isRunning = false;     // Thread에 "멈춰!" 신호
+                StopMeasureThreadFromBackground();
                 _ngp.Disconnect();
                 lblStatus.Text = "Disconnected";
                 lblStatus.Appearance.ForeColor = Color.Red;
@@ -125,7 +124,7 @@ namespace NGP814
             {
 
                 int ch = GetSelectedChannel();
-                string result = _ngp.Query("VOLT?");
+                string result = _ngp.ReadQ(3);//VOLT?
                 txtSetVolt.Text = double.Parse(result).ToString("F3");
                 _channels[ch].VoltFlag = true;
                 if (_channels[ch].VoltFlag && _channels[ch].CurrFlag)
@@ -177,7 +176,7 @@ namespace NGP814
             {
                 lblAutoRangeWarning.Visible = false;
                 int ch = GetSelectedChannel();
-                string result = _ngp.Query("CURR?");
+                string result = _ngp.ReadQ(5);//CURR?
                 txtSetCurr.Text = double.Parse(result).ToString("F4");
                 _channels[ch].CurrFlag = true;
                 if (_channels[ch].VoltFlag && _channels[ch].CurrFlag)
@@ -250,18 +249,18 @@ namespace NGP814
             try
             {
                 int ch = GetSelectedChannel();
-                string alimState = _ngp.Query("ALIM?");
+                string alimState = _ngp.ReadQ(7);//ALIM?
                 chkAlimEnable.Checked = alimState.Trim() == "1";
 
-                string voltLow = _ngp.Query("VOLT:ALIM:LOW?");
-                string voltHigh = _ngp.Query("VOLT:ALIM?");
+                string voltLow = _ngp.ReadQ(11);//VOLT:ALIM:LOW?
+                string voltHigh = _ngp.ReadQ(9);//VOLT:ALIM?
                 txtVoltLow.Text = double.Parse(voltLow).ToString("F3");
                 txtVoltHigh.Text = double.Parse(voltHigh).ToString("F3");
                 _channels[ch].VltLwFlag = true;
                 _channels[ch].VltHFlag = true;
 
-                string currLow = _ngp.Query("CURR:ALIM:LOW?");
-                string currHigh = _ngp.Query("CURR:ALIM?");
+                string currLow = _ngp.ReadQ(15); //CURR:ALIM:LOW?
+                string currHigh = _ngp.ReadQ(13);//CURR:ALIM?
                 _channels[ch].CrLwFlag = true;
                 _channels[ch].CrHFlag = true;
                 txtCurrLow.Text = double.Parse(currLow).ToString("F4");
@@ -276,60 +275,63 @@ namespace NGP814
 
         private void btnMeasure_Click(object sender, EventArgs e)
         {
-            DoMeasure();
+            int ch = GetSelectedChannel();
+            _ngp.SelectChannel(ch);
+            string voltResult = _ngp.ReadQ(16);//MEAS:VOLT?
+            double volt = double.Parse(voltResult);
+
+            string currResult = _ngp.ReadQ(17);//MEAS:CURR?
+            double curr = double.Parse(currResult);
+            ShowMeasurements( volt, curr );
         }
-        private void DoMeasure()
+        private void ShowMeasurements(double volt, double curr)
         {
-            try
-            {
-                int ch = GetSelectedChannel();
-                _ngp.SelectChannel(ch);
-
-                string voltResult = _ngp.Query("MEAS:VOLT?");
-                double volt = double.Parse(voltResult);
-                lblMeasVolt.Text = volt.ToString("F3") + " V";
-
-                string currResult = _ngp.Query("MEAS:CURR?");
-                double curr = double.Parse(currResult);
-                lblMeasCurr.Text = curr.ToString("F4") + " A";
-            }
-            catch (Exception ex)
-            {
-                _isRunning = false;              // Thread 멈춤
-                chkAutoRefresh.Checked = false;
-                MessageBox.Show("측정 실패: " + ex.Message);
-            }
+            lblMeasVolt.Text = volt.ToString("F3") + " V";
+            lblMeasCurr.Text = curr.ToString("F4") + " A";   
         }
         private void chkAutoRefresh_CheckedChanged(object sender, EventArgs e)
         {
             if (chkAutoRefresh.Checked)
             {
-                _isRunning = true;                        // 실행 플래그 ON
-                _thread = new Thread(MeasureLoop);        // 스레드 생성
+                if (_thread != null && _thread.IsAlive)// 연속해서 누르기 x
+                    return;
+                _cts = new CancellationTokenSource();
+                var ts = new ThreadStart(() => MeasureLoop(_cts.Token));
+                _thread = new Thread(ts);        // 스레드 생성
                 _thread.IsBackground = true;              // 프로그램 종료 시 같이 종료
                 _thread.Start();                          // 스레드 시작
             }
             else
             {
-                _isRunning = false;                       // 실행 플래그 OFF → while 루프 종료
+            StopMeasureThread(); // Join
             }
         }
 
-        private void MeasureLoop()                        // async Task → void
+        private void MeasureLoop(CancellationToken ct)                        // async Task → void
         {
-            while (_isRunning)                            // CancellationToken → bool 플래그
+            while (ct.IsCancellationRequested == false)                            // CancellationToken → bool 플래그
             {
                 try
                 {
-                    this.Invoke(new Action(() =>           // UI 스레드에서 실행 요청
+                    int ch=0;
+                    this.Invoke(new Action(() =>
                     {
-                        DoMeasure();
+                        ch= GetSelectedChannel();
+                    }));
+                    _ngp.SelectChannel(ch);
+                    string voltResult = _ngp.ReadQ(16);//MEAS:VOLT?
+                    double volt = double.Parse(voltResult);
+                    string currResult = _ngp.ReadQ(17);//MEAS:CURR?
+                    double curr = double.Parse(currResult);
+                    this.BeginInvoke(new Action(() =>           // UI 스레드에서 실행 요청
+                    {
+                        ShowMeasurements(volt, curr);
                     }));
                 }
                 catch
                 {
-                    _isRunning = false;                   // 에러 시 멈춤
-                    this.Invoke(new Action(() =>           // UI 스레드에서 체크 해제
+                    StopMeasureThreadFromBackground();//    StopMeasureThread 함수에서                                                                  연결 끊기면 예외,타임아웃 예외( ex)Query에서), 파싱 실패 예외 때 일어날 수 있음
+                    this.BeginInvoke(new Action(() =>           // UI 스레드에서 체크 해제
                     {
                         chkAutoRefresh.Checked = false;
                     }));
@@ -486,7 +488,6 @@ namespace NGP814
                     lblAutoRangeWarning.Appearance.ForeColor = Color.Red;
                     lblAutoRangeWarning.Text = $"Auto Ranging- Current 값을 {curr}로 변경";
                 }
-
             }
             catch
             { }
@@ -583,7 +584,7 @@ namespace NGP814
 
         private void CheckMode(int ch)
         {
-            string modeResult = _ngp.Query($"STAT:QUES:INST:ISUM{ch}:COND?").Trim();
+            string modeResult = _ngp.CheckMode(ch).Trim();
             lblMeasMode.Text = modeResult == "1" ? "CC" : modeResult == "2" ? "CV" : "OFF";
         }
 
@@ -604,7 +605,7 @@ namespace NGP814
 
             ShowSafetyValues(ch);
 
-            string modeResult = _ngp.Query($"STAT:QUES:INST:ISUM{ch}:COND?").Trim();
+            string modeResult = _ngp.CheckMode(ch).Trim();
             lblMeasMode.Text = modeResult == "1" ? "CC" : modeResult == "2" ? "CV" : "OFF";
         }
         private void LoadVoltCurr(int ch, int key)
@@ -615,38 +616,57 @@ namespace NGP814
                     ApplyGrayText(ch);
                     break;
                 case 1:
-                    txtSetVolt.Text = double.Parse(_ngp.Query("VOLT?")).ToString("F3");
+                    txtSetVolt.Text = double.Parse(_ngp.ReadQ(3)).ToString("F3");// VOLT?
                     break;
                 case 2:
-                    txtSetCurr.Text = double.Parse(_ngp.Query("CURR?")).ToString("F4");
+                    txtSetCurr.Text = double.Parse(_ngp.ReadQ(5)).ToString("F4");// CURR?
                     break;
                 case 3:
-                    txtSetVolt.Text = double.Parse(_ngp.Query("VOLT?")).ToString("F3");
-                    txtSetCurr.Text = double.Parse(_ngp.Query("CURR?")).ToString("F4");
+                    txtSetVolt.Text = double.Parse(_ngp.ReadQ(3)).ToString("F3");
+                    txtSetCurr.Text = double.Parse(_ngp.ReadQ(5)).ToString("F4");
                     UpdatePowerBar(ch);
                     break;
             }
         }
         private void ShowSafetyValues(int ch)
         {
-            if (_channels[ch].VltLwFlag) txtVoltLow.Text = double.Parse(_ngp.Query("VOLT:ALIM:LOW?")).ToString("F3");
-            if (_channels[ch].VltHFlag) txtVoltHigh.Text = double.Parse(_ngp.Query("VOLT:ALIM?")).ToString("F3");
-            if (_channels[ch].CrLwFlag) txtCurrLow.Text = double.Parse(_ngp.Query("CURR:ALIM:LOW?")).ToString("F4");
-            if (_channels[ch].CrHFlag) txtCurrHigh.Text = double.Parse(_ngp.Query("CURR:ALIM?")).ToString("F4");
+            if (_channels[ch].VltLwFlag) txtVoltLow.Text = double.Parse(_ngp.ReadQ(11)).ToString("F3");//VOLT:ALIM:LOW?
+            if (_channels[ch].VltHFlag) txtVoltHigh.Text = double.Parse(_ngp.ReadQ(9)).ToString("F3");//VOLT:ALIM?
+            if (_channels[ch].CrLwFlag) txtCurrLow.Text = double.Parse(_ngp.ReadQ(15)).ToString("F4");//CURR:ALIM:LOW?
+            if (_channels[ch].CrHFlag) txtCurrHigh.Text = double.Parse(_ngp.ReadQ(13)).ToString("F4");//CURR:ALIM?
             ApplyGrayLimit(ch);
         }
         private void ChangetxtColor(int ch)
         {
-            string modeResult = _ngp.Query($"STAT:QUES:INST:ISUM{ch}:COND?").Trim();
+            string modeResult = _ngp.CheckMode(ch).Trim();
             if (modeResult == "1")
             {
                 txtSetVolt.BackColor = Color.Yellow;
-                txtSetVolt.Text = double.Parse(_ngp.Query("VOLT?")).ToString("F3");
+                txtSetVolt.Text = double.Parse(_ngp.ReadQ(3)).ToString("F3");
                 return;
             }
-
             txtSetCurr.BackColor = Color.Yellow;
-            txtSetCurr.Text = double.Parse(_ngp.Query("CURR?")).ToString("F4");
+            txtSetCurr.Text = double.Parse(_ngp.ReadQ(5)).ToString("F4");
+        }
+
+        private void StopMeasureThread()
+        {
+            _cts?.Cancel();
+            _thread?.Join();
+            _thread = null;
+            _cts = null;
+        }
+        private void StopMeasureThreadFromBackground()
+        {
+            _cts?.Cancel();
+            _thread = null;
+            _cts = null;
+        }
+        private void ForcedCloseThread()
+        {
+            //_thread?.Abort();// .Net 5 이후로 MicroSoft에서 ResetAbort와 Abort를 삭제함
+            //Thread.ResetAbort();// 강제 종료 취소
+   
         }
     }
 }

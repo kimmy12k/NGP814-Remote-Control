@@ -14,7 +14,6 @@ namespace NGP814
     {
         private TcpClient _client;
         //private Thread _thread;
-        private bool _isRunning = false;
         private NetworkStream _stream;
         private StreamReader _reader;
         private StreamWriter _writer;
@@ -101,7 +100,7 @@ namespace NGP814
             return str;
         }
 
-        private string CheckMode(int ch)
+        public string CheckMode(int ch)
         {
             return Query($"STAT:QUES:INST:ISUM{ch}:COND?"); 
         }
